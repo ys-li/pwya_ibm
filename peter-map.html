@@ -1,0 +1,74 @@
+<html>
+<head>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+    }
+
+    .container {
+      position: relative;
+      height: 100%;
+    }
+
+    .map-base {
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      background-image: url(./assets/place-CA.jpg);
+      height: 100%;
+    }
+
+    .drone-container {
+      position: relative;
+    }
+
+    .drone {
+      display: inline-block;
+      width: 80px;
+      height: 80px;
+      background-repeat: no-repeat;
+      background-size: contain;
+      background-position: center;
+      background-image: url(./assets/drone-01.png);
+      position: absolute;
+      top: 0px;
+      left: 0px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="map-base" id="map">
+      <i class="drone"></i>
+      <i class="drone"></i>
+      <i class="drone"></i>
+      <i class="drone"></i>
+      <i class="drone"></i>
+    </div>
+  </div>
+  <script type="text/javascript">
+    function getRandomPx (pxVal = '0px') {
+      const val = Number(pxVal.replace('px', ''))
+      return (val + (Math.random() > 0.5 ? 1 : -1) * Math.random() * 10) + 'px'
+    }
+
+    const windowHeight = window.innerHeight
+    const windowWidth = window.innerWidth
+    const drones = document.getElementsByClassName('drone')
+    for (const drone of drones) {
+      drone.style.top = (windowHeight / 2) + 'px'
+      drone.style.left = (windowWidth / 2) + 'px'
+    }
+
+    function animate() {
+      requestAnimationFrame(animate)
+      for (const drone of drones) {
+        drone.style.top = getRandomPx(drone.style.top)
+        drone.style.left = getRandomPx(drone.style.left)
+      }
+    }
+    animate()
+  </script>
+</body>
+</html>
