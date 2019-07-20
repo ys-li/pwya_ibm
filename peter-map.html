@@ -1,74 +1,167 @@
 <html>
 <head>
-  <style>
-    body, html {
-      height: 100%;
-      margin: 0;
-    }
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
 
-    .container {
-      position: relative;
-      height: 100%;
-    }
+        .container {
+            position: relative;
+            width: 1024px;
+            height: 768px;
+        }
 
-    .map-base {
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center;
-      background-image: url(./assets/place-CA.jpg);
-      height: 100%;
-    }
+        .map-base {
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            background-image: url(./assets/place-CA.jpg);
+            width: 1024px;
+            height: 768px;
+        }
 
-    .drone-container {
-      position: relative;
-    }
+        .drone-container {
+            position: relative;
+        }
 
-    .drone {
-      display: inline-block;
-      width: 80px;
-      height: 80px;
-      background-repeat: no-repeat;
-      background-size: contain;
-      background-position: center;
-      background-image: url(./assets/drone-01.png);
-      position: absolute;
-      top: 0px;
-      left: 0px;
-    }
-  </style>
+        .drone {
+            /*display: inline-block;*/
+            /*width: 80px;*/
+            /*height: 80px;*/
+            /*background-repeat: no-repeat;*/
+            /*background-size: contain;*/
+            /*background-position: center;*/
+            /*background-image: url(./assets/drone-01.png);*/
+            /*position: absolute;*/
+            /*top: 0px;*/
+            /*left: 0px;*/
+        }
+
+        #overlay-canvas {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.3);
+            top: 0;
+            left: 0;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
+<div class="container">
     <div class="map-base" id="map">
-      <i class="drone"></i>
-      <i class="drone"></i>
-      <i class="drone"></i>
-      <i class="drone"></i>
-      <i class="drone"></i>
+        <!--<i class="drone"></i>-->
+        <!--<i class="drone"></i>-->
+        <!--<i class="drone"></i>-->
+        <!--<i class="drone"></i>-->
+        <!--<i class="drone"></i>-->
     </div>
-  </div>
-  <script type="text/javascript">
-    function getRandomPx (pxVal = '0px') {
-      const val = Number(pxVal.replace('px', ''))
-      return (val + (Math.random() > 0.5 ? 1 : -1) * Math.random() * 10) + 'px'
+    <canvas id="overlay-canvas" width="1024" height="768">
+
+    </canvas>
+</div>
+
+
+<script type="text/javascript">
+    const canvas = document.getElementById("overlay-canvas");
+    var width = canvas.width;
+    var height = canvas.height;
+    console.log(width, height);
+    const ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = false;
+    // clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // second per frame
+    const secondPerFrame = 0.033;
+
+    // init drone objects
+    const num_drones = 6;
+    const drones = [];
+    const dronesInitPosition = [[10, 10], [50, 300], [100, 700], [1000, 600], [700, 30], [800, 250]];
+    for (let i = 0; i < num_drones; i++) {
+        const imgTag = new Image();
+        imgTag.src = "./assets/drone.png";
+        drones.push({
+            id: i,
+            image: imgTag,
+            x: dronesInitPosition[i][0],
+            y: dronesInitPosition[i][1],
+            width: 30,
+            height: 30,
+            speed: 10, // pixel per second
+            xGoal: 600,
+            yGoal: 300,
+        });
     }
 
-    const windowHeight = window.innerHeight
-    const windowWidth = window.innerWidth
-    const drones = document.getElementsByClassName('drone')
-    for (const drone of drones) {
-      drone.style.top = (windowHeight / 2) + 'px'
-      drone.style.left = (windowWidth / 2) + 'px'
-    }
 
-    function animate() {
-      requestAnimationFrame(animate)
-      for (const drone of drones) {
-        drone.style.top = getRandomPx(drone.style.top)
-        drone.style.left = getRandomPx(drone.style.left)
-      }
-    }
-    animate()
-  </script>
+    const calculateFrame = () => {
+        // calculate drones' values
+        for (let drone of drones) {
+
+            // calculate the drone movement
+            const goalDistance = Math.sqrt(Math.pow(drone.x - drone.xGoal, 2) + Math.pow(drone.y - drone.yGoal, 2));
+            const nextDistance = drone.speed * secondPerFrame;
+            const similarRatio = nextDistance / goalDistance;
+            const nextXStep = similarRatio * (Math.abs(drone.xGoal - drone.x));
+            const nextYStep = similarRatio * (Math.abs(drone.yGoal - drone.y));
+
+            if (drone.x < drone.xGoal) {
+                drone.x = drone.x + nextXStep;
+            } else {
+                drone.x = drone.x - nextXStep;
+            }
+            if (drone.y < drone.yGoal) {
+                drone.y = drone.y + nextYStep;
+            } else {
+                drone.y = drone.y - nextYStep;
+            }
+        }
+    };
+
+    const renderFrame = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);  // clear canvas
+
+
+        // render drones
+        for (let drone of drones) {
+            // console.log(drone.image, drone.x, drone.y, drone.width, drone.height);
+            ctx.drawImage(drone.image, drone.x, drone.y, drone.width, drone.height);     // draw image at current position
+            // render drone target line
+            ctx.beginPath();
+            ctx.moveTo(drone.x + drone.width / 2, drone.y + drone.height / 2);
+            ctx.lineTo(drone.xGoal, drone.yGoal);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#ff0000';
+            ctx.stroke();
+        }
+    };
+
+    const runFrame = () => {
+        // console.log('run');
+        calculateFrame();
+        renderFrame();
+    };
+
+    // 1000 = 1 second, 30 fps -> 0.033s per frame
+    setInterval(runFrame, 33);
+
+
+    // const windowHeight = window.innerHeight
+    // const windowWidth = window.innerWidth
+    // for (const drone of drones) {
+    //     drone.style.top = (windowHeight / 2) + 'px'
+    //     drone.style.left = (windowWidth / 2) + 'px'
+    // }
+
+    // function animate() {
+    //     requestAnimationFrame(animate)
+    //     for (const drone of drones) {
+    //         drone.style.top = getRandomPx(drone.style.top)
+    //         drone.style.left = getRandomPx(drone.style.left)
+    //     }
+    // }
+
+    // animate()
+</script>
 </body>
 </html>
