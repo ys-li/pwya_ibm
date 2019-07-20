@@ -16,7 +16,7 @@
             background-repeat: no-repeat;
             background-size: cover;
             background-position: center;
-            background-image: url(./assets/place-CA.jpg);
+            /*background-image: url(./assets/place-CA.jpg);*/
             width: 1024px;
             height: 768px;
         }
@@ -47,6 +47,7 @@
     </style>
 </head>
 <body>
+<h3 id="msg-box">Select a drone with left click, then right click a target location.</h3>
 <div class="container">
     <div class="map-base" id="map">
         <!--<i class="drone"></i>-->
@@ -55,7 +56,7 @@
         <!--<i class="drone"></i>-->
         <!--<i class="drone"></i>-->
     </div>
-    <canvas id="overlay-canvas" width="1024" height="768">
+    <canvas id="overlay-canvas" width="1024" height="768" oncontextmenu="return false;">
 
     </canvas>
 </div>
@@ -69,7 +70,7 @@
     var height = canvas.height;
     console.log(width, height);
     const ctx = canvas.getContext("2d");
-    ctx.imageSmoothingEnabled = false;
+    // ctx.imageSmoothingEnabled = false;
     // clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // second per frame
@@ -78,10 +79,12 @@
     // init drone objects
     const num_drones = 6;
     const drones = [];
-    const dronesInitPosition = [[10, 10], [50, 300], [100, 700], [1000, 600], [700, 30], [800, 250]];
+    const dronesInitPosition = [[200, 100], [50, 300], [100, 700], [1000, 600], [700, 30], [800, 250]];
+
     for (let i = 0; i < num_drones; i++) {
         const imgTag = new Image();
         imgTag.src = "./assets/drone.png";
+
         drones.push({
             id: i,
             image: imgTag,
@@ -92,8 +95,10 @@
             speed: 50, // pixel per second
             xGoal: dronesInitPosition[i][0],
             yGoal: dronesInitPosition[i][1],
+            selected: false,
         });
     }
+
 
     // drone control listener
     const getCursorPosition = (canvas, event) => {
@@ -103,12 +108,84 @@
         return [x, y];
     };
 
+    let mousedown = false;
+    let dragging = false;
+    let xSelectionStart = -10;
+    let ySelectionStart = -10;
+    let xSelectionEnd = -10;
+    let ySelectionEnd = -10;
+
     canvas.addEventListener('mousedown', (e) => {
         const position = getCursorPosition(canvas, e);
-        for (let drone of drones) {
-            drone.xGoal = position[0];
-            drone.yGoal = position[1];
+        switch (e.which) {
+            case 3: // right click
+                // instruct drones fly to that location
+                console.log(`Selected Location ${position}`);
+                for (let drone of drones) {
+                    if (drone.selected) {
+                        drone.xGoal = position[0];
+                        drone.yGoal = position[1];
+                    }
+                }
+                break;
+            case 1: // left click
+                // update selection
+                xSelectionStart = position[0];
+                ySelectionStart = position[1];
+                mousedown = true;
+                let count = 0;
+                for (let drone of drones) {
+                    drone.selected = false;
+                    const clickDistance = Math.sqrt(Math.pow(drone.x - position[0], 2) + Math.pow(drone.y - position[1], 2));
+                    if (clickDistance <= drone.width) {
+                        drone.selected = true;
+                        count++;
+                    }
+                }
+
+                console.log(`Selected number of Drones ${count}`);
+                document.getElementById('msg-box').innerText = (`Selected number of Drones ${count}`);
+                break;
         }
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (mousedown) {
+            const position = getCursorPosition(canvas, e);
+            dragging = true;
+            xSelectionEnd = position[0];
+            ySelectionEnd = position[1];
+        }
+    });
+
+    canvas.addEventListener('mouseup', (e) => {
+        if (dragging) {
+            const selectionRectX = Math.min(xSelectionStart, xSelectionEnd);
+            const selectionRectY = Math.min(ySelectionStart, ySelectionEnd);
+            const selectionRectWidth = Math.abs(xSelectionEnd - xSelectionStart);
+            const selectionRectHeight = Math.abs(ySelectionEnd - ySelectionStart);
+
+            let count = 0;
+            for (let drone of drones) {
+                drone.selected = false;
+                console.log(drone.x, (selectionRectX + selectionRectWidth), drone.x >= selectionRectX && drone.x <= (selectionRectX + selectionRectWidth))
+                if (drone.x >= selectionRectX && drone.x <= (selectionRectX + selectionRectWidth) &&
+                    drone.y >= selectionRectY && drone.y <= (selectionRectY + selectionRectHeight)
+                ) {
+                    drone.selected = true;
+                    count++;
+                }
+            }
+            console.log(`Selected number of Drones ${count}`);
+            document.getElementById('msg-box').innerText = (`Selected number of Drones ${count}`);
+
+            dragging = false;
+            xSelectionStart = -10;
+            xSelectionEnd = -10;
+            ySelectionStart = -10;
+            ySelectionEnd = -10;
+        }
+        mousedown = false;
     });
 
 
@@ -140,8 +217,26 @@
     const renderFrame = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);  // clear canvas
 
+        if (dragging) {
+            // render selection
+            const selectionRectX = Math.min(xSelectionStart, xSelectionEnd);
+            const selectionRectY = Math.min(ySelectionStart, ySelectionEnd);
+            const selectionRectWidth = Math.abs(xSelectionEnd - xSelectionStart);
+            const selectionRectHeight = Math.abs(ySelectionEnd - ySelectionStart);
+            ctx.beginPath();
+            ctx.rect(selectionRectX, selectionRectY, selectionRectWidth, selectionRectHeight);
+            ctx.strokeStyle = '#333333';
+            ctx.stroke();
+        }
+
         // render drones
         for (let drone of drones) {
+            if (drone.selected) {
+                ctx.beginPath();
+                ctx.fillStyle = '#ff0000';
+                ctx.fillRect(drone.x - drone.width / 2, drone.y + drone.height / 2, drone.width, 2);
+                ctx.stroke();
+            }
             ctx.drawImage(drone.image, drone.x - drone.width / 2, drone.y - drone.height / 2, drone.width, drone.height);     // draw image at current position
             const goalDistance = Math.sqrt(Math.pow(drone.x - drone.xGoal, 2) + Math.pow(drone.y - drone.yGoal, 2));
             if (goalDistance >= 2) {
