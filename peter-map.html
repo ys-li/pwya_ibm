@@ -63,6 +63,8 @@
 
 <script type="text/javascript">
     const canvas = document.getElementById("overlay-canvas");
+
+
     var width = canvas.width;
     var height = canvas.height;
     console.log(width, height);
@@ -87,33 +89,50 @@
             y: dronesInitPosition[i][1],
             width: 30,
             height: 30,
-            speed: 10, // pixel per second
-            xGoal: 600,
-            yGoal: 300,
+            speed: 50, // pixel per second
+            xGoal: dronesInitPosition[i][0],
+            yGoal: dronesInitPosition[i][1],
         });
     }
+
+    // drone control listener
+    const getCursorPosition = (canvas, event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        return [x, y];
+    };
+
+    canvas.addEventListener('mousedown', (e) => {
+        const position = getCursorPosition(canvas, e);
+        for (let drone of drones) {
+            drone.xGoal = position[0];
+            drone.yGoal = position[1];
+        }
+    });
 
 
     const calculateFrame = () => {
         // calculate drones' values
         for (let drone of drones) {
-
-            // calculate the drone movement
             const goalDistance = Math.sqrt(Math.pow(drone.x - drone.xGoal, 2) + Math.pow(drone.y - drone.yGoal, 2));
-            const nextDistance = drone.speed * secondPerFrame;
-            const similarRatio = nextDistance / goalDistance;
-            const nextXStep = similarRatio * (Math.abs(drone.xGoal - drone.x));
-            const nextYStep = similarRatio * (Math.abs(drone.yGoal - drone.y));
+            if (goalDistance >= 2) {
+                // calculate the drone movement
+                const nextDistance = drone.speed * secondPerFrame;
+                const similarRatio = nextDistance / goalDistance;
+                const nextXStep = similarRatio * (Math.abs(drone.xGoal - drone.x));
+                const nextYStep = similarRatio * (Math.abs(drone.yGoal - drone.y));
 
-            if (drone.x < drone.xGoal) {
-                drone.x = drone.x + nextXStep;
-            } else {
-                drone.x = drone.x - nextXStep;
-            }
-            if (drone.y < drone.yGoal) {
-                drone.y = drone.y + nextYStep;
-            } else {
-                drone.y = drone.y - nextYStep;
+                if (drone.x < drone.xGoal) {
+                    drone.x = drone.x + nextXStep;
+                } else {
+                    drone.x = drone.x - nextXStep;
+                }
+                if (drone.y < drone.yGoal) {
+                    drone.y = drone.y + nextYStep;
+                } else {
+                    drone.y = drone.y - nextYStep;
+                }
             }
         }
     };
@@ -121,18 +140,19 @@
     const renderFrame = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);  // clear canvas
 
-
         // render drones
         for (let drone of drones) {
-            // console.log(drone.image, drone.x, drone.y, drone.width, drone.height);
-            ctx.drawImage(drone.image, drone.x, drone.y, drone.width, drone.height);     // draw image at current position
-            // render drone target line
-            ctx.beginPath();
-            ctx.moveTo(drone.x + drone.width / 2, drone.y + drone.height / 2);
-            ctx.lineTo(drone.xGoal, drone.yGoal);
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#ff0000';
-            ctx.stroke();
+            ctx.drawImage(drone.image, drone.x - drone.width / 2, drone.y - drone.height / 2, drone.width, drone.height);     // draw image at current position
+            const goalDistance = Math.sqrt(Math.pow(drone.x - drone.xGoal, 2) + Math.pow(drone.y - drone.yGoal, 2));
+            if (goalDistance >= 2) {
+                // render drone target line
+                ctx.beginPath();
+                ctx.moveTo(drone.x, drone.y);
+                ctx.lineTo(drone.xGoal, drone.yGoal);
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#ff0000';
+                ctx.stroke();
+            }
         }
     };
 
