@@ -1,0 +1,255 @@
+<html>
+
+<head>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      position: relative;
+    }
+
+    h1, h2, h3, h4 {
+      margin: 0;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    .vh-center {
+      display: inline-block;
+      position: relative;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .container {
+      position: relative;
+      background: #333;
+      padding-bottom: 300px;
+    }
+
+    .block {
+      padding: 40px 20px;
+      border-bottom: 2px solid white;
+      color: white;
+      background: linear-gradient(to right, #555, #333);
+    }
+
+    .block:nth-child(even) {
+      color: black;
+      background: linear-gradient(to right, #bbb, #ddd);
+    }
+
+    .block-title {
+      margin-bottom: 10px;
+      font-size: 25px;
+    }
+
+    .controls {
+      color: white;
+      display: flex;
+      align-items: center;
+    }
+
+    .control {
+      display: flex;
+      flex: 1;
+      margin: 10px;
+    }
+
+    .control h3 {
+      margin-right: 10px;
+    }
+
+    .control.right {
+      flex: 0;
+    }
+
+    .control.column {
+      flex-direction: column;
+    }
+
+    .control input {
+      font-size: 16px;
+      border-radius: 15px;
+      padding: 5px;
+      border: none;
+      text-align: center;
+    }
+
+    button {
+      font-size: 14px;
+      border-radius: 20px;
+      padding: 8px 15px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(to left, #555, #333);
+      border: 2px solid white;
+      color: white;
+    }
+    button:hover {
+      box-shadow: 0px 0px 5px white;
+    }
+
+    input[type="number"] {
+      width: 70px;
+      padding-left: 15px;
+    }
+
+    .map-base {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    .data-source-container {
+
+      padding: 20px;
+    }
+
+    .data-sources {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .data-source {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 15px;
+      /* background: #fff; */
+      box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+      border: 2px solid #22ce16;
+    }
+
+    .data-source-disable {
+      opacity: 0.3;
+      background: transparent;
+      box-shadow: none;
+      border-color: transparent;
+    }
+
+    .data-source-title {
+      font-size: 16px;
+    }
+
+    .data-source-img {
+      background-image: url(https://img.icons8.com/nolan/64/000000/data-backup.png);
+      background-position: center;
+      background-size: contain;
+      background-repeat: no-repeat;
+      height: 70px;
+    }
+
+    .summary-button-plan {
+      font-size: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="block">
+      <h1>Drone save your ass</h1>
+    </div>
+    <div class="block">
+      <h1 class="block-title">Controls</h1>
+      <div class="controls">
+        <div class="control">
+          <div class="control">
+            <h3>Start Date</h3>
+            <input id="input-drone-number" type="date" value="2019-07-04" />
+          </div>
+          <div class="control">
+            <h3>Number of Drones</h3>
+            <input id="input-drone-number" type="number" value="10" />
+          </div>
+          <div class="control">
+            <h3>Number of Medical units</h3>
+            <input id="input-med-number" type="number" value="3" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="block">
+      <h1 class="block-title">Data source</h1>
+      <div class="data-sources">
+      </div>
+    </div>
+    <div class="block">
+      <h1 class="block-title">Summary</h1>
+      <div class="right">
+        <button class="summary-button-plan">Plan</button>
+      </div>
+    </div>
+    <div class="block">
+      <h1 class="block-title">Map</h1>
+      <div class="map-base" id="map">
+        <h1 class="vh-center">show map here</h1>
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    $(document).ready(function () {
+      init()
+    })
+
+    const apps = [{
+      name: "xamarin",
+      image: "icons8-xamarin-100.png"
+    },
+    {
+      name: "ask.fm",
+      image: "icons8-ask.fm-100.png"
+    },
+    {
+      name: "brave",
+      image: "icons8-brave-web-browser-100.png"
+    },
+    {
+      name: "cloudflare",
+      image: "icons8-cloudflare-100.png"
+    },
+    {
+      name: "firebase",
+      image: "icons8-firebase-100.png"
+    },
+    {
+      name: "joomla",
+      image: "icons8-joomla-100.png"
+    },
+    {
+      name: "lunacy",
+      image: "icons8-lunacy-100.png"
+    },
+    {
+      name: "oovoo",
+      image: "icons8-oovoo-100.png"
+    },
+    {
+      name: "weibo",
+      image: "icons8-weibo-100.png"
+    }]
+
+    const toName = (n = '') => n[0].toUpperCase() + n.slice(1)
+
+    function init () {
+      const dataSources = $('.data-sources')
+      apps.forEach(({ name, image }) => {
+        dataSources.append(`<div class="data-source"><div class="data-source-img" style="background-image:url(./assets/app-icon/${image});"></div><h4 class="data-source-title">${toName(name)}</h4></div>`)
+      })
+
+      dataSources.find('.data-source').on('click', function (e) {
+        $(this).toggleClass('data-source-disable')
+      })
+    }
+  </script>
+</body>
+
+</html>
