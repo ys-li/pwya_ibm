@@ -2,16 +2,26 @@
 
 <head>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
   <style>
     body, html {
       height: 100%;
       margin: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       position: relative;
+      line-height: 1.5;
     }
 
     h1, h2, h3, h4 {
       margin: 0;
+    }
+
+    strong {
+      background: #eee;
+      color: #222;
+      padding: 3px 5px;
+      border-radius: 10px;
+      margin: 0 2px;
     }
 
     .right {
@@ -59,6 +69,7 @@
       display: flex;
       flex: 1;
       margin: 10px;
+      align-items: center;
     }
 
     .control h3 {
@@ -155,23 +166,23 @@
 <body>
   <div class="container">
     <div class="block">
-      <h1>Drone save your ass</h1>
+      <h1>Disater Drone Platform (DDP)</h1>
     </div>
     <div class="block">
       <h1 class="block-title">Controls</h1>
       <div class="controls">
         <div class="control">
           <div class="control">
-            <h3>Start Date</h3>
-            <input id="input-drone-number" type="date" value="2019-07-04" />
+            <h3>Key hours</h3>
+            <input data-id="keyHour" id="input-drone-number" type="number" value="12" />
           </div>
           <div class="control">
-            <h3>Number of Drones</h3>
-            <input id="input-drone-number" type="number" value="10" />
+            <h3>Drones #</h3>
+            <input data-id="numDrones" id="input-drone-number" type="number" value="10" />
           </div>
           <div class="control">
-            <h3>Number of Medical units</h3>
-            <input id="input-med-number" type="number" value="3" />
+            <h3>Medical units #</h3>
+            <input data-id="numMeds" id="input-med-number" type="number" value="3" />
           </div>
         </div>
       </div>
@@ -183,8 +194,9 @@
     </div>
     <div class="block">
       <h1 class="block-title">Summary</h1>
+      <div class="summary-content"></div>
       <div class="right">
-        <button class="summary-button-plan">Plan</button>
+        <button class="summary-button-plan">Show routes</button>
       </div>
     </div>
     <div class="block">
@@ -239,6 +251,11 @@
 
     const toName = (n = '') => n[0].toUpperCase() + n.slice(1)
 
+    const inputData = {
+      numDrones: 10,
+      numMeds: 3,
+      keyHour: 12
+    }
     function init () {
       const dataSources = $('.data-sources')
       apps.forEach(({ name, image }) => {
@@ -248,7 +265,29 @@
       dataSources.find('.data-source').on('click', function (e) {
         $(this).toggleClass('data-source-disable')
       })
+
+      const dataInputs = $('input[data-id]')
+      dataInputs.change(function (e) {
+        const dataId = $(this).data('id')
+        inputData[dataId] = e.target.value
+        updateSummary()
+      })
     }
+
+    const totalTime = inputData.keyHour * 3600 * 1000
+    const summaryContent = $('.summary-content')
+    function updateSummary() {
+      const timeNeeded = (1 - Math.min(inputData.numDrones * 3.7, 100) / 101 * 0.7 - Math.min(inputData.numMeds * 1.5, 20) / 21 * 0.3) * totalTime
+      const hours = (timeNeeded / 1000 / 3600).toFixed(2)
+      summaryContent.html(`<p>
+        There will be <strong>${inputData.numDrones} drones</strong> scanning the map and <strong>${inputData.numMeds} meds units</strong> will be dispatched.
+        <br>
+        <strong>${inputData.numDrones} sources</strong> of 3rd party data will be connected to evaluate the rescue route.
+        <br>
+        The total recume time is about <strong>${hours} hours</strong>.
+      </p>`)
+    }
+    updateSummary()
   </script>
 </body>
 
