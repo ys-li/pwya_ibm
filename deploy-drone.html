@@ -47,7 +47,10 @@
     </style>
 </head>
 <body>
-<h3 id="msg-box">Select a drone with left click, then right click a target location.</h3>
+<h3 id="msg-box1">Drone Deployed: 0</h3>
+<h3 id="msg-box2">Drone Selected: 0</h3>
+<!--<button id="deploy-mode-button">Deploy New Drones</button>-->
+<!--<button id="control-mode-button">Control Drones</button>-->
 <div class="container">
     <div class="map-base" id="map">
         <!--<i class="drone"></i>-->
@@ -77,27 +80,27 @@
     const secondPerFrame = 0.033;
 
     // init drone objects
-    const num_drones = 6;
+    const num_drones = 0;
     const drones = [];
-    const dronesInitPosition = [[200, 100], [50, 300], [100, 700], [1000, 600], [700, 30], [800, 250]];
-
-    for (let i = 0; i < num_drones; i++) {
+    // const dronesInitPosition = [];
+    const deployNewDrone = (id, x, y)=>{
         const imgTag = new Image();
         imgTag.src = "./assets/drone.png";
 
         drones.push({
-            id: i,
+            id: id,
             image: imgTag,
-            x: dronesInitPosition[i][0],
-            y: dronesInitPosition[i][1],
+            x: x,
+            y: y,
             width: 30,
             height: 30,
             speed: 50, // pixel per second
-            xGoal: dronesInitPosition[i][0],
-            yGoal: dronesInitPosition[i][1],
+            xGoal: x,
+            yGoal: y,
             selected: false,
         });
-    }
+        document.getElementById('msg-box1').innerText = (`Drone Deployed: ${drones.length}`);
+    };
 
 
     // drone control listener
@@ -117,6 +120,7 @@
 
     canvas.addEventListener('mousedown', (e) => {
         const position = getCursorPosition(canvas, e);
+        console.log(e.which, e.ctrlKey);
         switch (e.which) {
             case 3: // right click
                 // instruct drones fly to that location
@@ -129,23 +133,29 @@
                 }
                 break;
             case 1: // left click
-                // update selection
-                xSelectionStart = position[0];
-                ySelectionStart = position[1];
-                mousedown = true;
-                let count = 0;
-                for (let drone of drones) {
-                    drone.selected = false;
-                    const clickDistance = Math.sqrt(Math.pow(drone.x - position[0], 2) + Math.pow(drone.y - position[1], 2));
-                    if (clickDistance <= drone.width) {
-                        drone.selected = true;
-                        count++;
-                        break
+                if (e.ctrlKey) {
+                    // deploy new drone
+                    console.log('deploy');
+                    deployNewDrone(drones.length, position[0], position[1]);
+                } else {
+                    // update selection
+                    xSelectionStart = position[0];
+                    ySelectionStart = position[1];
+                    mousedown = true;
+                    let count = 0;
+                    for (let drone of drones) {
+                        drone.selected = false;
+                        const clickDistance = Math.sqrt(Math.pow(drone.x - position[0], 2) + Math.pow(drone.y - position[1], 2));
+                        if (clickDistance <= drone.width) {
+                            drone.selected = true;
+                            count++;
+                            break
+                        }
                     }
-                }
 
-                console.log(`Selected number of Drones ${count}`);
-                document.getElementById('msg-box').innerText = (`Selected number of Drones ${count}`);
+                    console.log(`Selected number of Drones ${count}`);
+                    document.getElementById('msg-box2').innerText = (`Drone Selected: ${count}`);
+                }
                 break;
         }
     });
@@ -178,7 +188,7 @@
                 }
             }
             console.log(`Selected number of Drones ${count}`);
-            document.getElementById('msg-box').innerText = (`Selected number of Drones ${count}`);
+            document.getElementById('msg-box2').innerText = (`Drone Selected: ${count}`);
 
             dragging = false;
             xSelectionStart = -10;
