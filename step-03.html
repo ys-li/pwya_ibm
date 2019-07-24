@@ -1,7 +1,8 @@
 <html>
 
 <head>
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
     <style>
         body, html {
             height: 100%;
@@ -91,6 +92,7 @@
             border: 2px solid white;
             color: white;
         }
+
         button:hover {
             box-shadow: 0px 0px 5px white;
         }
@@ -173,15 +175,15 @@
             <div class="control">
                 <div class="control">
                     <h3>Start Date</h3>
-                    <input id="input-drone-number" type="date" value="2019-07-04" />
+                    <input id="input-drone-number" type="date" value="2019-07-04"/>
                 </div>
                 <div class="control">
                     <h3>Number of Drones</h3>
-                    <input id="input-drone-number" type="number" value="10" />
+                    <input id="input-drone-number" type="number" value="10"/>
                 </div>
                 <div class="control">
                     <h3>Number of Medical units</h3>
-                    <input id="input-med-number" type="number" value="3" />
+                    <input id="input-med-number" type="number" value="3"/>
                 </div>
             </div>
         </div>
@@ -199,6 +201,8 @@
     </div>
     <div class="block" style="position: relative;">
         <h1 class="block-title">Map</h1>
+        <h3>1) Ctrl + Left Click: Deploy a new drone, 2) Left click: Select a drone, 3) Right click: Move a drone</h3>
+        <h3>1) Shift + Left Click: Make a damaged location 2) The closest drone will go to the damaged location</h3>
         <h3 id="msg-box1">Drone Deployed: 0</h3>
         <h3 id="msg-box2">Drone Selected: 0</h3>
         <div class="map-base" id="map">
@@ -249,13 +253,13 @@
         {
             name: "weibo",
             image: "icons8-weibo-100.png"
-        }]
+        }];
 
     const toName = (n = '') => n[0].toUpperCase() + n.slice(1)
 
-    function init () {
+    function init() {
         const dataSources = $('.data-sources')
-        apps.forEach(({ name, image }) => {
+        apps.forEach(({name, image}) => {
             dataSources.append(`<div class="data-source"><div class="data-source-img" style="background-image:url(./assets/app-icon/${image});"></div><h4 class="data-source-title">${toName(name)}</h4></div>`)
         })
 
@@ -284,7 +288,7 @@
     const num_drones = 0;
     const drones = [];
     // const dronesInitPosition = [];
-    const deployNewDrone = (id, x, y)=>{
+    const deployNewDrone = (id, x, y) => {
         const imgTag = new Image();
         imgTag.src = "./assets/drone.png";
 
@@ -299,8 +303,27 @@
             xGoal: x,
             yGoal: y,
             selected: false,
+            assignedLocationId: null,
+            currentTargetPositionIndex: 0,
+            assignedPositions: [],
         });
         document.getElementById('msg-box1').innerText = (`Drone Deployed: ${drones.length}`);
+    };
+
+    const damagedLocations = [];
+    const setDamagedLocation = (x, y) => {
+        const imgTag = new Image();
+        imgTag.src = "./assets/alert.png";
+        damagedLocations.push({
+            id: damagedLocations.length,
+            x: x,
+            y, y,
+            image: imgTag,
+            width: 30,
+            height: 30,
+            assignedDroneId: null,
+        });
+        console.log(damagedLocations);
     };
 
 
@@ -338,6 +361,9 @@
                     // deploy new drone
                     console.log('deploy');
                     deployNewDrone(drones.length, position[0], position[1]);
+                }
+                if (e.shiftKey) {
+                    setDamagedLocation(position[0], position[1]);
                 } else {
                     // update selection
                     xSelectionStart = position[0];
@@ -402,9 +428,43 @@
 
 
     const calculateFrame = () => {
+        // assign task
+        for (let location of damagedLocations) {
+            if (location.assignedDroneId !== null)
+                continue;
+            let min = 9999999;
+            let minDroneId = null;
+            for (let drone of drones) {
+                const distance = Math.sqrt(Math.pow(drone.x - location.x, 2) + Math.pow(drone.y - location.y, 2));
+                if (distance <= min && drone.assignedLocationId == null) {
+                    min = distance;
+                    minDroneId = drone.id;
+                }
+            }
+            if (minDroneId !== null) {
+                drones[minDroneId].assignedLocationId = location.id;
+                drones[minDroneId].assignedPositions = [
+                    [location.x - 30, location.y - 30],
+                    [location.x - 30, location.y + 30],
+                    [location.x + 30, location.y + 30],
+                    [location.x + 30, location.y - 30]
+                ];
+                drones[minDroneId].currentTargetPositionIndex = 0;
+                location.assignedDroneId = minDroneId;
+            }
+        }
+
+
         // calculate drones' values
         for (let drone of drones) {
-            const goalDistance = Math.sqrt(Math.pow(drone.x - drone.xGoal, 2) + Math.pow(drone.y - drone.yGoal, 2));
+            if (drone.assignedLocationId !== null) {
+                const targetPosition = drone.assignedPositions[drone.currentTargetPositionIndex];
+                console.log(drone.currentTargetPositionIndex);
+                drone.xGoal = targetPosition[0];
+                drone.yGoal = targetPosition[1];
+            }
+            let goalDistance = Math.sqrt(Math.pow(drone.x - drone.xGoal, 2) + Math.pow(drone.y - drone.yGoal, 2));
+
             if (goalDistance >= 2) {
                 // calculate the drone movement
                 const nextDistance = drone.speed * secondPerFrame;
@@ -422,6 +482,11 @@
                 } else {
                     drone.y = drone.y - nextYStep;
                 }
+            } else if (drone.assignedLocationId !== null) {
+                if (drone.currentTargetPositionIndex !== 3)
+                    drone.currentTargetPositionIndex += 1;
+                else
+                    drone.currentTargetPositionIndex = 0;
             }
         }
     };
@@ -460,6 +525,11 @@
                 ctx.strokeStyle = '#ff0000';
                 ctx.stroke();
             }
+        }
+
+        // render damaged location
+        for (let location of damagedLocations) {
+            ctx.drawImage(location.image, location.x - location.width / 2, location.y - location.height / 2, location.width, location.height)
         }
     };
 
