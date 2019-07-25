@@ -44,6 +44,7 @@
     }
 
     .block {
+      position: relative;
       padding: 40px 20px;
       border-bottom: 2px solid white;
       color: white;
@@ -201,9 +202,12 @@
     </div>
     <div class="block">
       <h1 class="block-title">Map</h1>
-      <div class="map-base" id="map">
-        <h1 class="vh-center">show map here</h1>
-      </div>
+      <h3>1) Ctrl + Left Click: Deploy a new drone, 2) Left click: Select a drone, 3) Right click: Move a drone</h3>
+      <h3>1) Shift + Left Click: Make a damaged location 2) The closest drone will go to the damaged location</h3>
+      <h3 id="msg-box1">Drone Deployed: 0</h3>
+      <h3 id="msg-box2">Drone Selected: 0</h3>
+      <div class="map-base" id="map"></div>
+      <canvas id="overlay-canvas" width="1024" height="768" oncontextmenu="return false;"></canvas>
     </div>
     <div class="block">
       <h1 class="block-title">Drones</h1>
