@@ -5,6 +5,10 @@ function initMap () {
   const mapBase = $('#map')
   const mapHoverInfo = $('#map .map-hover-info')
 
+  function updateMapHoverInfo ({ zoneId, damageRate, needed }) {
+    mapHoverInfo.html(`Damage area <strong>#${zoneId}</strong><br><strong>${(damageRate * 100).toFixed(1)}%</strong> broken<br>${Object.keys(needed).filter(k => needed[k]).map(k => `<span class="tag">${k[0].toUpperCase() + k.slice(1).toLowerCase()}</span>`).join('')}`)
+  }
+
   var width = canvas.width;
   var height = canvas.height;
   console.log(width, height);
@@ -45,30 +49,41 @@ function initMap () {
   const setDamagedLocation = (x, y) => {
     const imgTag = new Image();
     imgTag.src = "./assets/alert.png";
+    const id = damagedLocations.length
     damagedLocations.push({
-      id: damagedLocations.length,
+      id,
       x: x,
       y, y,
       image: imgTag,
       width: 30,
       height: 30,
       assignedDroneId: null,
+      zoneId: id + 1,
+      damageRate: Math.random(),
+      needed: {
+        meds: Math.random() > 0.5,
+        search: Math.random() > 0.5,
+        drone: Math.random() > 0.5,
+        build: Math.random() > 0.5,
+      },
     });
     console.log(x, y, damagedLocations);
-    
+
     mapBase.append(getRippleHtml(x, y))
-    const ripple = mapBase.last() 
-    ripple.mouseover(function (e) {
-      console.log(e.clientX, e.clientY, e.target.getBoundingClientRect())
+    const ripple = mapBase.find('.map-ripple').last()
+    ripple.mouseenter(function () {
+      updateMapHoverInfo(damagedLocations[id])
+    })
+    ripple.mousemove(function (e) {
+      const offset = window.innerWidth / 2 < e.screenX ? 200 : 0
       mapHoverInfo.css('top', e.offsetY + y)
-      mapHoverInfo.css('left', e.offsetX + x)
+      mapHoverInfo.css('left', e.offsetX + x - offset)
     })
     ripple.mouseleave(function (e) {
       mapHoverInfo.css('top', -9999)
       mapHoverInfo.css('left', -9999)
     })
   };
-
 
   // drone control listener
   const getCursorPosition = (canvas, event) => {
@@ -175,7 +190,7 @@ function initMap () {
     for (let location of damagedLocations) {
       if (location.assignedDroneId !== null)
         continue;
-      let min = 9999999;
+      let min = Number.MAX_SAFE_INTEGER;
       let minDroneId = null;
       for (let drone of drones) {
         const distance = Math.sqrt(Math.pow(drone.x - location.x, 2) + Math.pow(drone.y - location.y, 2));
@@ -202,7 +217,7 @@ function initMap () {
     for (let drone of drones) {
       if (drone.assignedLocationId !== null) {
         const targetPosition = drone.assignedPositions[drone.currentTargetPositionIndex];
-        console.log(drone.currentTargetPositionIndex);
+        // console.log(drone.currentTargetPositionIndex);
         drone.xGoal = targetPosition[0];
         drone.yGoal = targetPosition[1];
       }
