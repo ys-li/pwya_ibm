@@ -119,6 +119,7 @@
       background-image: url(./assets/place-CA.jpg);
       width: 1024px;
       height: 768px;
+      overflow: hidden;
     }
 
     #overlay-canvas {
@@ -128,6 +129,32 @@
       bottom: 0;
       left: 0;
       right: 0;
+    }
+
+    .map-hover-info {
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+      line-height: 2;
+      background: linear-gradient(#333333bb, #777777bb);
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 1px 1px 15px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+    }
+
+    .tag {
+      background: orange;
+      color: white;
+      padding: 5px;
+      border-radius: 10px;
+    }
+
+    .map-ripple {
+      width: 70px;
+      height: 70px;
+      position: absolute;
+      transform: translate(-35px, -35px);
     }
 
     .data-source-container {
@@ -219,13 +246,21 @@
       <h3 id="msg-box1">Drone Deployed: 0</h3>
       <h3 id="msg-box2">Drone Selected: 0</h3>
       <div class="map-base" id="map">
-          <canvas id="overlay-canvas" width="1024" height="768" oncontextmenu="return false;"></canvas>
+        <canvas id="overlay-canvas" width="1024" height="768" oncontextmenu="return false;"></canvas>
+        <p class="map-hover-info">
+          Damage area <strong>#1</strong>
+          <br>
+          <strong>57.3%</strong> broken
+          <br>
+          <span class="tag">Med units</span>
+          <span class="tag">Search units</span>
+        </p>
       </div>
     </div>
     <div class="block">
       <h1 class="block-title">Drones</h1>
       <div>
-
+          
       </div>
     </div>
   </div>

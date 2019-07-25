@@ -4,40 +4,41 @@ function initControlsAndDataSources () {
     image: "icons8-xamarin-100.png"
   },
   {
-    name: "Socials",
-    image: "icons8-ask.fm-100.png"
+    name: "Environments",
+    image: "https://loading.io/spinners/lava-lamp/index.lava-lamp-preloader.svg"
   },
+  {
+    name: "Predictive",
+    image: "https://loading.io/spinners/sunny/index.solar-light-ajax-spinner.svg"
+  },
+  
   {
     name: "Biometrics",
     image: "icons8-brave-web-browser-100.png"
   },
   {
     name: "Weathers",
-    image: "icons8-cloudflare-100.png"
+    image: "https://loading.io/spinners/rainy/index.rainy-preloader.svg"
   },
   {
-    name: "Environments",
-    image: "icons8-firebase-100.png"
-  },
-  {
-    name: "Measures",
+    name: "Resources",
     image: "goop.png"
   },
   {
     name: "Historical",
-    image: "icons8-lunacy-100.png"
-  },
-  {
-    name: "Predictive",
-    image: "icons8-oovoo-100.png"
+    image: "https://loading.io/spinners/equalizer/index.equalizer-bars-loader.svg"
   },
   {
     name: "Sensors",
-    image: "icons8-weibo-100.png"
+    image: "https://loading.io/spinners/radio/index.broadcast-rss-wifi-signal-preloader-gif.svg"
+  },
+  {
+    name: "Socials",
+    image: "icons8-ask.fm-100.png"
   },
   {
     name: "Traffic",
-    image: "icons8-joomla-100.png"
+    image: "https://loading.io/spinners/globe/index.globe-earth-spinner.svg"
   }]
 
   const toName = (n = '') => n[0].toUpperCase() + n.slice(1)
@@ -65,7 +66,8 @@ function initControlsAndDataSources () {
   const summaryContent = $('.summary-content')
 
   apps.forEach(({ name, image }) => {
-    dataSources.append(`<div class="data-source"><div class="data-source-img" style="background-image:url(./assets/app-icon/${image});"></div><h4 class="data-source-title">${toName(name)}</h4></div>`)
+    const imageUrl = image.startsWith('http') ? image : `./assets/app-icon/${image}`
+    dataSources.append(`<div class="data-source"><div class="data-source-img" style="background-image:url(${imageUrl});"></div><h4 class="data-source-title">${toName(name)}</h4></div>`)
   })
 
   dataSources.find('.data-source').on('click', function (e) {
