@@ -116,7 +116,7 @@
 
     .map-base {
       position: relative;
-      background-image: url(./assets/place-CA.jpg);
+      /* background-image: url(./assets/place-CA.jpg); */
       width: 1024px;
       height: 768px;
       overflow: hidden;
@@ -202,6 +202,49 @@
     .summary-button-plan {
       font-size: 30px;
     }
+
+    #drone-status-base {
+      display: flex;
+      flex-flow: wrap;
+      justify-content: space-evenly
+    }
+
+    .drone-block {
+      display: flex;
+      flex-direction: column;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      background-color: #5f5f5f;
+      color: #dedede;
+    }
+
+    .drone-battery-container {
+      margin: 5px;
+      display: flex;
+    }
+
+    .drone-battery-container strong {
+      flex: 1;
+      padding: 5px;
+    }
+
+    .drone-battery {
+      display: inline-block;
+      flex: 1;
+      background-color: limegreen;
+      height: 14px;
+      border-radius: 10px;
+    }
+
+    .drone-scan-img {
+      width: 200px;
+      height: 200px;
+      background-repeat: no-repeat;
+      background-image: url(./assets/place-CA.jpg);
+      background-size: 1024px 768px;
+    }
+
   </style>
 </head>
 <body>
@@ -247,6 +290,7 @@
       <h3 id="msg-box1">Drone Deployed: 0</h3>
       <h3 id="msg-box2">Drone Selected: 0</h3>
       <div class="map-base" id="map">
+        <img id="map-img" src="./assets/place-CA.jpg" width="1024" height="768">
         <canvas id="overlay-canvas" width="1024" height="768" oncontextmenu="return false;"></canvas>
         <p class="map-hover-info">
         </p>
@@ -254,8 +298,7 @@
     </div>
     <div class="block">
       <h1 class="block-title">Drones</h1>
-      <div>
-
+      <div id="drone-status-base">
       </div>
     </div>
   </div>

@@ -3,7 +3,9 @@ const getRippleHtml = (x = 0, y = 0) => `<div class="map-ripple" style="top:${y}
 function initMap () {
   const canvas = document.getElementById("overlay-canvas");
   const mapBase = $('#map')
+  const mapImg = document.getElementById('map-img')
   const mapHoverInfo = $('#map .map-hover-info')
+  const droneStatusBase = $('#drone-status-base')
 
   function updateMapHoverInfo ({ zoneId, damageRate, needed }) {
     mapHoverInfo.html(`Damage area <strong>#${zoneId}</strong><br><strong>${(damageRate * 100).toFixed(1)}%</strong> broken<br>${Object.keys(needed).filter(k => needed[k]).map(k => `<span class="tag">${k[0].toUpperCase() + k.slice(1).toLowerCase()}</span>`).join('')}`)
@@ -27,8 +29,9 @@ function initMap () {
     const imgTag = new Image();
     imgTag.src = "./assets/drone.png";
 
+    const droneId = id + 1;
     drones.push({
-      id: id,
+      id,
       image: imgTag,
       x: x,
       y: y,
@@ -41,8 +44,15 @@ function initMap () {
       assignedLocationId: null,
       currentTargetPositionIndex: 0,
       assignedPositions: [],
+      battery: Math.random() * 50 + 50,
     });
     document.getElementById('msg-box1').innerText = (`Drone Deployed: ${drones.length}`);
+
+    droneStatusBase.append(`<div class="drone-block"><h2 class="drone-name">Drone #${droneId}</h2><div class="drone-status">Status: <strong class="drone-status-text">Idle</strong></div><div class="drone-battery-container">Battery: <strong><span class="drone-battery"></span></strong></div><div class="drone-scan"><h3 class="drone-scan-name">Area:</h3><div class="drone-scan-img"></div></div></div>`)
+    const drone$ = droneStatusBase.find('.drone-block').last()
+    drones[id].statusText$ = drone$.find('.drone-status-text')
+    drones[id].areaImg$ = drone$.find('.drone-scan-img')
+    drones[id].battery$ = drone$.find('.drone-battery')
   };
 
   const damagedLocations = [];
@@ -209,6 +219,10 @@ function initMap () {
         ];
         drones[minDroneId].currentTargetPositionIndex = 0;
         location.assignedDroneId = minDroneId;
+
+        if (drones[minDroneId].statusText$) {
+          drones[minDroneId].statusText$.html('Scanning')
+        }
       }
     }
 
@@ -283,6 +297,10 @@ function initMap () {
         ctx.strokeStyle = '#ff0000';
         ctx.stroke();
       }
+
+      drone.areaImg$.css('background-position', `-${drone.x}px -${drone.y}px`)
+      drone.battery -= Math.random() * 0.05
+      drone.battery$.css('width', drone.battery + '%')
     }
 
     // render damaged location
