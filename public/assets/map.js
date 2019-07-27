@@ -6,6 +6,7 @@ function initMap () {
   const mapImg = document.getElementById('map-img')
   const mapHoverInfo = $('#map .map-hover-info')
   const droneStatusBase = $('#drone-status-base')
+  const planButton = $('.summary-button-plan')
 
   function updateMapHoverInfo ({ zoneId, damageRate, needed }) {
     mapHoverInfo.html(`Damage area <strong>#${zoneId}</strong><br><strong>${(damageRate * 100).toFixed(1)}%</strong> broken<br>${Object.keys(needed).filter(k => needed[k]).map(k => `<span class="tag">${k[0].toUpperCase() + k.slice(1).toLowerCase()}</span>`).join('')}`)
@@ -25,7 +26,8 @@ function initMap () {
   const num_drones = 0;
   const drones = [];
   // const dronesInitPosition = [];
-  const deployNewDrone = (id, x, y) => {
+  const deployNewDrone = (x, y) => {
+    const id = drones.length
     const imgTag = new Image();
     imgTag.src = "./assets/drone.png";
 
@@ -128,7 +130,7 @@ function initMap () {
         if (e.ctrlKey) {
           // deploy new drone
           console.log('deploy');
-          deployNewDrone(drones.length, position[0], position[1]);
+          deployNewDrone(position[0], position[1]);
         }
         if (e.shiftKey) {
           setDamagedLocation(position[0], position[1]);
@@ -317,4 +319,21 @@ function initMap () {
 
   // 1000 = 1 second, 30 fps -> 0.033s per frame
   setInterval(runFrame, 33);
+
+  planButton.click(function (e) {
+    for (let i = 0; i < 3; i++) {
+      setDamagedLocation(Math.random() * 800 + 100, Math.random() * 500 + 100)
+    }
+    for (let i = 0; i < 10; i++) {
+      let x, y
+      if (Math.random() > 0.5) {
+        x = Math.random() * 50
+        y = Math.random() * 500 + 100
+      } else {
+        x = Math.random() * 800 + 100
+        y = Math.random() * 50
+      }
+      deployNewDrone(x, y)
+    }
+  })
 }
