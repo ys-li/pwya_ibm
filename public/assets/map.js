@@ -321,9 +321,9 @@ function initMap () {
   setInterval(runFrame, 33);
 
   planButton.click(function (e) {
-    for (let i = 0; i < 3; i++) {
-      setDamagedLocation(Math.random() * 800 + 100, Math.random() * 500 + 100)
-    }
+    // for (let i = 0; i < 3; i++) {
+    //   setDamagedLocation(Math.random() * 800 + 100, Math.random() * 500 + 100)
+    // }
     for (let i = 0; i < 10; i++) {
       let x, y
       if (Math.random() > 0.5) {
