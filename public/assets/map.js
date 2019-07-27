@@ -7,6 +7,7 @@ function initMap () {
   const mapHoverInfo = $('#map .map-hover-info')
   const droneStatusBase = $('#drone-status-base')
   const planButton = $('.summary-button-plan')
+  const droneNumberInput = $('#input-drone-number')
 
   function updateMapHoverInfo ({ zoneId, damageRate, needed }) {
     mapHoverInfo.html(`Damage area <strong>#${zoneId}</strong><br><strong>${(damageRate * 100).toFixed(1)}%</strong> broken<br>${Object.keys(needed).filter(k => needed[k]).map(k => `<span class="tag">${k[0].toUpperCase() + k.slice(1).toLowerCase()}</span>`).join('')}`)
@@ -48,13 +49,15 @@ function initMap () {
       assignedPositions: [],
       battery: Math.random() * 50 + 50,
     });
-    document.getElementById('msg-box1').innerText = (`Drone Deployed: ${drones.length}`);
+    document.getElementById('msg-box1').innerText = drones.length;
 
-    droneStatusBase.append(`<div class="drone-block"><h2 class="drone-name">Drone #${droneId}</h2><div class="drone-status">Status: <strong class="drone-status-text">Idle</strong></div><div class="drone-battery-container">Battery: <strong><span class="drone-battery"></span></strong></div><div class="drone-scan"><h3 class="drone-scan-name">Area:</h3><div class="drone-scan-img"></div></div></div>`)
+    const droneMode = Math.random() > 0.5 ? 'Cellular' : 'P2P'
+    droneStatusBase.append(`<div class="drone-block"><h2 class="drone-name">Drone #${droneId}</h2><div class="drone-status">Status: <strong class="drone-status-text">Idle</strong></div><div class="drone-mode">Model: <strong>${droneMode}</strong></div><div class="drone-battery-container">Battery: <strong><span class="drone-battery"></span></strong></div><div class="drone-scan"><h3 class="drone-scan-name">Area:</h3><div class="drone-scan-img"></div></div></div>`)
     const drone$ = droneStatusBase.find('.drone-block').last()
     drones[id].statusText$ = drone$.find('.drone-status-text')
     drones[id].areaImg$ = drone$.find('.drone-scan-img')
     drones[id].battery$ = drone$.find('.drone-battery')
+    drones[id].mode$ = drone$.find('.drone-mode')
   };
 
   const damagedLocations = [];
@@ -151,7 +154,7 @@ function initMap () {
           }
 
           console.log(`Selected number of Drones ${count}`);
-          document.getElementById('msg-box2').innerText = (`Drone Selected: ${count}`);
+          document.getElementById('msg-box2').innerText = count;
         }
         break;
     }
@@ -185,7 +188,7 @@ function initMap () {
         }
       }
       console.log(`Selected number of Drones ${count}`);
-      document.getElementById('msg-box2').innerText = (`Drone Selected: ${count}`);
+      document.getElementById('msg-box2').innerText = count
 
       dragging = false;
       xSelectionStart = -10;
@@ -324,7 +327,9 @@ function initMap () {
     // for (let i = 0; i < 3; i++) {
     //   setDamagedLocation(Math.random() * 800 + 100, Math.random() * 500 + 100)
     // }
-    for (let i = 0; i < 10; i++) {
+    console.log(droneNumberInput.val())
+    const droneNumber = parseInt(droneNumberInput.val()) || 10
+    for (let i = 0; i < droneNumber; i++) {
       let x, y
       if (Math.random() > 0.5) {
         x = Math.random() * 50

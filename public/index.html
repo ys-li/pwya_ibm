@@ -203,12 +203,6 @@
       font-size: 30px;
     }
 
-    #drone-status-base {
-      display: flex;
-      flex-flow: wrap;
-      justify-content: space-evenly
-    }
-
     .drone-block {
       display: flex;
       flex-direction: column;
@@ -219,9 +213,23 @@
       color: #dedede;
     }
 
-    .drone-battery-container {
-      margin: 5px;
+    #drone-status-base {
       display: flex;
+      flex-flow: wrap;
+      justify-content: space-evenly
+    }
+
+    .drone-status {
+      margin-bottom: 10px;
+    }
+
+    .drone-mode {
+      margin-bottom: 10px;
+    }
+
+    .drone-battery-container {
+      display: flex;
+      margin-bottom: 10px;
     }
 
     .drone-battery-container strong {
@@ -258,7 +266,7 @@
         <div class="control">
           <div class="control">
             <h3>Key hours</h3>
-            <input data-id="keyHour" id="input-drone-number" type="number" value="12" />
+            <input data-id="keyHour" id="input-hour-number" type="number" value="12" />
           </div>
           <div class="control">
             <h3>Drones #</h3>
@@ -280,15 +288,16 @@
       <h1 class="block-title">Summary</h1>
       <div class="summary-content"></div>
       <div class="right">
-        <button class="summary-button-plan">Show routes</button>
+        <button class="summary-button-plan">Deploy drones</button>
       </div>
     </div>
     <div class="block">
       <h1 class="block-title">Map</h1>
-      <h3>1) Ctrl + Left Click: Deploy a new drone, 2) Left click: Select a drone, 3) Right click: Move a drone</h3>
-      <h3>1) Shift + Left Click: Make a damaged location 2) The closest drone will go to the damaged location</h3>
-      <h3 id="msg-box1">Drone Deployed: 0</h3>
-      <h3 id="msg-box2">Drone Selected: 0</h3>
+      <!-- <h3>1) Ctrl + Left Click: Deploy a new drone, 2) Left click: Select a drone, 3) Right click: Move a drone</h3>
+      <h3>1) Shift + Left Click: Make a damaged location 2) The closest drone will go to the damaged location</h3> -->
+      <h3>
+        Drone Deployed: <strong id="msg-box1">0</strong> Drone Selected: <strong id="msg-box2">0</strong>
+      </h3>
       <div class="map-base" id="map">
         <img id="map-img" src="./assets/place-CA.jpg" width="1024" height="768">
         <canvas id="overlay-canvas" width="1024" height="768" oncontextmenu="return false;"></canvas>
@@ -301,12 +310,17 @@
       <div id="drone-status-base">
       </div>
     </div>
+    <div class="block">
+      <small>@2019 PWYA. All rights reserved.</small>
+    </div>
   </div>
 
   <script type="text/javascript">
     $(document).ready(function () {
       initControlsAndDataSources()
       initMap()
+
+      window.alert('Instructions:\n1) Ctrl + Left Click: Deploy a new drone, 2) Left click: Select a drone, 3) Right click: Move a drone\n\n1) Shift + Left Click: Make a damaged location 2) The closest drone will go to the damaged location')
     })
   </script>
 </body>
